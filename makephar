@@ -9,7 +9,7 @@ if(empty($argv[1])) {
 
 if(empty($argv[2])) {
     echo "No name specified for the PHAR file!".PHP_EOL;
-    print_usage().PHP_EOL;
+    print_usage();
     exit();
 }
 
