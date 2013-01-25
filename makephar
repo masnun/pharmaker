@@ -1,0 +1,70 @@
+#!/usr/bin/env php -q
+<?php
+if(empty($argv[1])) {
+    echo "No source directory specified!".PHP_EOL;
+    print_usage().PHP_EOL;
+    exit();
+}
+
+
+if(empty($argv[2])) {
+    echo "No name specified for the PHAR file!".PHP_EOL;
+    print_usage().PHP_EOL;
+    exit();
+}
+
+$srcDirectory = $argv[1];
+$pharName = $argv[2];
+$defaultFile = empty($argv[3]) ? null : $argv[3];
+$defaultWebFile = empty($argv[4]) ? null : $argv[4];
+
+
+echo PHP_EOL;
+echo "==========: STARTING PHAR BUILD PROCESS :==========".PHP_EOL;
+echo "Source Directory: ".$srcDirectory.PHP_EOL;
+echo "PHAR Name: ".$pharName.PHP_EOL;
+if($defaultFile) {
+    echo "CLI Script: ".$defaultFile.PHP_EOL;
+} else {
+    echo "CLI Script: No file specified, assuming 'index.php'".PHP_EOL;
+    $defaultFile = "index.php";
+}
+
+if(!$defaultWebFile) {
+    $defaultWebFile = $defaultFile;
+} else {
+    echo "Web Script: ".$defaultWebFile.PHP_EOL;
+}
+
+// Default files must exist!
+if(!file_exists($srcDirectory."/".$defaultFile)) {
+    echo "CLI script doesn't exist. Please create '{$defaultFile}' inside '{$srcDirectory}'".PHP_EOL;
+    exit();
+}
+
+
+
+if(!file_exists($srcDirectory."/".$defaultWebFile)) {
+    echo "WEB script doesn't exist. Please create '{$defaultWebFile}' inside '{$srcDirectory}'".PHP_EOL;
+    exit();
+}
+
+
+//  Build it out
+try {
+$phar = new Phar($pharName,0,$pharName);
+$phar->buildFromDirectory($srcDirectory);
+$phar->setStub($phar->createDefaultStub($defaultFile,$defaultWebFile));
+echo "DONE: Built {$pharName}".PHP_EOL;
+} catch (Exception $ex) {
+    echo PHP_EOL;
+    echo "ERROR: ". $ex->getMessage().PHP_EOL;
+}
+
+
+// Functions
+function print_usage() {
+    echo PHP_EOL;
+    echo "USAGE: ".PHP_EOL;
+    echo "./makephar <source directory> <phar name> [<cli script> <web script>]".PHP_EOL;
+}
