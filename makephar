@@ -52,10 +52,14 @@ if(!file_exists($srcDirectory."/".$defaultWebFile)) {
 
 //  Build it out
 try {
-$phar = new Phar($pharName,0,$pharName);
-$phar->buildFromDirectory($srcDirectory);
-$phar->setStub($phar->createDefaultStub($defaultFile,$defaultWebFile));
-echo "DONE: Built {$pharName}".PHP_EOL;
+    $phar = new Phar($pharName,0,$pharName);
+    $phar->startBuffering();
+    $phar->buildFromDirectory($srcDirectory);
+    $defaultStub = $phar->createDefaultStub($defaultFile,$defaultWebFile);
+    $stub = "#!/usr/bin/env php \n". $defaultStub;
+    $phar->setStub($stub);
+    $phar->stopBuffering();
+    echo "DONE: Built {$pharName}".PHP_EOL;
 } catch (Exception $ex) {
     echo PHP_EOL;
     echo "ERROR: ". $ex->getMessage().PHP_EOL;
